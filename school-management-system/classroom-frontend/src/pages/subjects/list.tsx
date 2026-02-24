@@ -37,7 +37,7 @@ const SubjectsList = () => {
       },
       {
         id: "department",
-        accessorKey: "department.name",
+        accessorKey: "department",
         size: 150,
         header: () => <p className="column-title">Department</p>,
         cell: ({ getValue }) => (
@@ -124,12 +124,12 @@ const SubjectsList = () => {
         <div className="intro-row">
             <p>Quick access to essential metrics and management tools.</p>
             <div className="actions-row">
-                <div className="flex search-field items-center justify-center p-4 border-2 focus:outline-none rounded-full">
+                <div className="flex search-field items-center justify-center p-4 border-2 rounded-full">
                     <Search className="search-icon" />
                     <input
                         type="text"
                         placeholder='Search by name...'
-                        className='pl-10 w-full'
+                        className='pl-10 w-full focus:outline-none '
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
