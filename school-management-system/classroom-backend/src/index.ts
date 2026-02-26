@@ -1,3 +1,7 @@
+import('apminsight')
+  .then(({ default: AgentAPI }) => AgentAPI.config())
+  .catch(() => console.log('APM not available in this environment'));
+  
 import express from "express";
 import { uptime } from "node:process";
 import subjectsRouter from "./routes/subjects.js";
@@ -9,6 +13,8 @@ import enrollmentsRouter from "./routes/enrollments.js";
 
 import cors from "cors";
 import securityMiddleware from "./middlewares/security.js";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "./lib/auth.js";
 
 const app = express();
 const PORT = 8000;
@@ -22,8 +28,9 @@ app.use(
 );
 
 app.use(express.json());
-app.use(securityMiddleware);
+// app.use(securityMiddleware);
 
+app.all("/api/auth/*splat", toNodeHandler(auth));
 // Routes
 app.use("/api/subjects", subjectsRouter);
 app.use("/api/classes", classesRouter);
