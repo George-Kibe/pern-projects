@@ -1,7 +1,7 @@
 import('apminsight')
   .then(({ default: AgentAPI }) => AgentAPI.config())
   .catch(() => console.log('APM not available in this environment'));
-  
+
 import express from "express";
 import { uptime } from "node:process";
 import subjectsRouter from "./routes/subjects.js";
@@ -10,15 +10,12 @@ import usersRouter from "./routes/users.js";
 import departmentsRouter from "./routes/departments.js";
 import statsRouter from "./routes/stats.js";
 import enrollmentsRouter from "./routes/enrollments.js";
-import serverless from "serverless-http";
 
 import cors from "cors";
-import securityMiddleware from "./middlewares/security.js";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
 
-const app = express();
-const PORT = 8000;
+export const app = express();
 
 app.use(
   cors({
@@ -29,7 +26,6 @@ app.use(
 );
 
 app.use(express.json());
-// app.use(securityMiddleware);
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
 // Routes
@@ -40,7 +36,7 @@ app.use("/api/departments", departmentsRouter);
 app.use("/api/stats", statsRouter);
 app.use("/api/enrollments", enrollmentsRouter);
 
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.json({ 
     message: "Hello and welcome to the classroom API!",
     uptime : uptime(),
@@ -50,8 +46,9 @@ app.get("/", (req, res) => {
  })
 } );
 
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
+// Local dev (optional):
+// app.listen(8000, () => {
+//   console.log("Server is running on port 8000");
 // });
 
-export default serverless(app);
+export default app;

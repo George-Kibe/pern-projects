@@ -103,7 +103,6 @@ router.post("/", async (req, res) => {
         bannerUrl,
         capacity,
         description,
-        schedules: [],
         status,
       })
       .returning({ id: classes.id });
