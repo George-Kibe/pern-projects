@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { inArray } from "drizzle-orm";
 
-import { db } from "../src/db";
+import { db } from "../db";
 import {
   account,
   classes,
@@ -12,7 +12,7 @@ import {
   session,
   subjects,
   user,
-} from "../src/db/schema";
+} from "../db/schema";
 
 type SeedUser = {
   id: string;

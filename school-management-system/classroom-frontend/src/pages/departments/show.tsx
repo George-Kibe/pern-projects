@@ -1,6 +1,7 @@
-import { useLink, useShow } from "@refinedev/core";
+import { useShow } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { ColumnDef } from "@tanstack/react-table";
+import { BookOpen, Layers, Users } from "lucide-react";
 import { useMemo } from "react";
 import { useParams } from "react-router";
 
@@ -13,22 +14,35 @@ import {
   ShowView,
   ShowViewHeader,
 } from "@/components/refine-ui/views/show-view";
-import type { Department, Subject } from "@/types";
+import type { Department } from "@/types";
 
-type SubjectDetails = {
-  subject: Subject & {
-    department?: Department | null;
-  };
+type DepartmentDetails = {
+  department: Department;
   totals: {
+    subjects: number;
     classes: number;
+    enrolledStudents: number;
   };
 };
 
-type SubjectClass = {
+type DepartmentSubject = {
+  id: number;
+  name: string;
+  code?: string | null;
+  description?: string | null;
+  createdAt?: string | null;
+};
+
+type DepartmentClass = {
   id: number;
   name: string;
   status?: string | null;
   capacity?: number | null;
+  subject?: {
+    id: number;
+    name: string;
+    code?: string | null;
+  } | null;
   teacher?: {
     id: string;
     name: string;
@@ -37,7 +51,7 @@ type SubjectClass = {
   } | null;
 };
 
-type SubjectUser = {
+type DepartmentUser = {
   id: string;
   name: string;
   email: string;
@@ -45,18 +59,76 @@ type SubjectUser = {
   image?: string | null;
 };
 
-const SubjectsShow = () => {
-  const Link = useLink();
+const DepartmentShow = () => {
   const { id } = useParams();
-  const subjectId = id ?? "";
+  const departmentId = id ?? "";
 
-  const { query } = useShow<SubjectDetails>({
-    resource: "subjects",
+  const { query } = useShow<DepartmentDetails>({
+    resource: "departments",
   });
 
   const details = query.data?.data;
 
-  const classColumns = useMemo<ColumnDef<SubjectClass>[]>(
+  const subjectColumns = useMemo<ColumnDef<DepartmentSubject>[]>(
+    () => [
+      {
+        id: "code",
+        accessorKey: "code",
+        size: 120,
+        header: () => <p className="column-title ml-2">Code</p>,
+        cell: ({ getValue }) => {
+          const code = getValue<string>();
+          return code ? (
+            <Badge>{code}</Badge>
+          ) : (
+            <span className="text-muted-foreground ml-2">No code</span>
+          );
+        },
+      },
+      {
+        id: "name",
+        accessorKey: "name",
+        size: 220,
+        header: () => <p className="column-title">Subject</p>,
+        cell: ({ getValue }) => (
+          <span className="text-foreground">{getValue<string>()}</span>
+        ),
+      },
+      {
+        id: "description",
+        accessorKey: "description",
+        size: 320,
+        header: () => <p className="column-title">Description</p>,
+        cell: ({ getValue }) => {
+          const description = getValue<string>();
+
+          return description ? (
+            <span className="truncate line-clamp-2">{description}</span>
+          ) : (
+            <span className="text-muted-foreground">No description</span>
+          );
+        },
+      },
+      {
+        id: "details",
+        size: 140,
+        header: () => <p className="column-title">Details</p>,
+        cell: ({ row }) => (
+          <ShowButton
+            resource="subjects"
+            recordItemId={row.original.id}
+            variant="outline"
+            size="sm"
+          >
+            View
+          </ShowButton>
+        ),
+      },
+    ],
+    []
+  );
+
+  const classColumns = useMemo<ColumnDef<DepartmentClass>[]>(
     () => [
       {
         id: "name",
@@ -66,6 +138,24 @@ const SubjectsShow = () => {
         cell: ({ getValue }) => (
           <span className="text-foreground">{getValue<string>()}</span>
         ),
+      },
+      {
+        id: "subject",
+        accessorKey: "subject",
+        size: 200,
+        header: () => <p className="column-title">Subject</p>,
+        cell: ({ row }) => {
+          const subject = row.original.subject;
+          if (!subject) {
+            return <span className="text-muted-foreground">No subject</span>;
+          }
+          return (
+            <span className="truncate">
+              {subject.name}
+              {subject.code ? ` (${subject.code})` : ""}
+            </span>
+          );
+        },
       },
       {
         id: "teacher",
@@ -129,7 +219,7 @@ const SubjectsShow = () => {
     []
   );
 
-  const userColumns = useMemo<ColumnDef<SubjectUser>[]>(
+  const userColumns = useMemo<ColumnDef<DepartmentUser>[]>(
     () => [
       {
         id: "name",
@@ -181,10 +271,10 @@ const SubjectsShow = () => {
     []
   );
 
-  const classesTable = useTable<SubjectClass>({
-    columns: classColumns,
+  const subjectsTable = useTable<DepartmentSubject>({
+    columns: subjectColumns,
     refineCoreProps: {
-      resource: `subjects/${subjectId}/classes`,
+      resource: `departments/${departmentId}/subjects`,
       pagination: {
         pageSize: 10,
         mode: "server",
@@ -192,10 +282,21 @@ const SubjectsShow = () => {
     },
   });
 
-  const teachersTable = useTable<SubjectUser>({
+  const classesTable = useTable<DepartmentClass>({
+    columns: classColumns,
+    refineCoreProps: {
+      resource: `departments/${departmentId}/classes`,
+      pagination: {
+        pageSize: 10,
+        mode: "server",
+      },
+    },
+  });
+
+  const teachersTable = useTable<DepartmentUser>({
     columns: userColumns,
     refineCoreProps: {
-      resource: `subjects/${subjectId}/users`,
+      resource: `departments/${departmentId}/users`,
       pagination: {
         pageSize: 10,
         mode: "server",
@@ -212,10 +313,10 @@ const SubjectsShow = () => {
     },
   });
 
-  const studentsTable = useTable<SubjectUser>({
+  const studentsTable = useTable<DepartmentUser>({
     columns: userColumns,
     refineCoreProps: {
-      resource: `subjects/${subjectId}/users`,
+      resource: `departments/${departmentId}/users`,
       pagination: {
         pageSize: 10,
         mode: "server",
@@ -235,13 +336,13 @@ const SubjectsShow = () => {
   if (query.isLoading || query.isError || !details) {
     return (
       <ShowView className="class-view">
-        <ShowViewHeader resource="subjects" title="Subject Details" />
+        <ShowViewHeader resource="departments" title="Department Details" />
         <p className="text-sm text-muted-foreground">
           {query.isLoading
-            ? "Loading subject details..."
+            ? "Loading department details..."
             : query.isError
-            ? "Failed to load subject details."
-            : "Subject details not found."}
+            ? "Failed to load department details."
+            : "Department details not found."}
         </p>
       </ShowView>
     );
@@ -249,44 +350,56 @@ const SubjectsShow = () => {
 
   return (
     <ShowView className="class-view space-y-6">
-      <ShowViewHeader resource="subjects" title={details.subject.name} />
+      <ShowViewHeader resource="departments" title={details.department.name} />
 
       <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="flex w-full flex-row items-center justify-between">
-          <CardTitle>Subject Overview</CardTitle>
-          <Badge variant="secondary">{details.subject.code}</Badge>
+        <CardHeader>
+          <CardTitle>Overview</CardTitle>
         </CardHeader>
-
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {details.subject.description ?? "No description provided."}
+            {details.department.description ?? "No description provided."}
           </p>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-lg border border-border bg-muted/20 p-4">
+              <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                <span>Total Subjects</span>
+                <BookOpen className="h-4 w-4" />
+              </div>
+              <div className="mt-2 text-2xl font-semibold">
+                {details.totals.subjects}
+              </div>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/20 p-4">
+              <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                <span>Total Classes</span>
+                <Layers className="h-4 w-4" />
+              </div>
+              <div className="mt-2 text-2xl font-semibold">
+                {details.totals.classes}
+              </div>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/20 p-4">
+              <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                <span>Enrolled Students</span>
+                <Users className="h-4 w-4" />
+              </div>
+              <div className="mt-2 text-2xl font-semibold">
+                {details.totals.enrolledStudents}
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       <Card className="hover:shadow-md transition-shadow">
-        <CardHeader>
-          <CardTitle>Department</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Subjects</CardTitle>
+          <Badge variant="secondary">{details.totals.subjects}</Badge>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {details.subject.department ? (
-            <>
-              <Link
-                to={`/departments/show/${details.subject.department.id}`}
-                className="text-lg font-semibold text-foreground hover:underline"
-              >
-                {details.subject.department.name}
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                {details.subject.department.description ??
-                  "No department description provided."}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Department not assigned.
-            </p>
-          )}
+        <CardContent>
+          <DataTable table={subjectsTable}  />
         </CardContent>
       </Card>
 
@@ -306,7 +419,7 @@ const SubjectsShow = () => {
             <CardTitle>Teachers</CardTitle>
           </CardHeader>
           <CardContent>
-            <DataTable table={teachersTable} />
+            <DataTable table={teachersTable}  />
           </CardContent>
         </Card>
 
@@ -332,4 +445,4 @@ const getInitials = (name = "") => {
   }`.toUpperCase();
 };
 
-export default SubjectsShow;
+export default DepartmentShow;

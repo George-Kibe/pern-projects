@@ -10,6 +10,7 @@ import usersRouter from "./routes/users.js";
 import departmentsRouter from "./routes/departments.js";
 import statsRouter from "./routes/stats.js";
 import enrollmentsRouter from "./routes/enrollments.js";
+import serverless from "serverless-http";
 
 import cors from "cors";
 import securityMiddleware from "./middlewares/security.js";
@@ -49,6 +50,8 @@ app.get("/", (req, res) => {
  })
 } );
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
+
+export default serverless(app);
