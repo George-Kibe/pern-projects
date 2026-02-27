@@ -1,25 +1,6 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.ts",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "classroom-frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ]
+  "buildCommand": "cd classroom-frontend && npm ci && npm run build",
+  "devCommand": "cd classroom-frontend && npm run dev -- --host 0.0.0.0 --port $PORT",
+  "outputDirectory": "classroom-frontend/dist"
 }

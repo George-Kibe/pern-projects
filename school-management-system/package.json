@@ -1,6 +1,8 @@
 {
   "private": true,
   "type": "module",
+  "name": "school-management-system",
+  "version": "0.0.1",
   "scripts": {
     "build": "cd classroom-frontend && npm install && npm run build"
   },
