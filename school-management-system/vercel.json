@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "buildCommand": "cd classroom-frontend && npm ci && npm run build",
+  "devCommand": "cd classroom-frontend && npm run dev -- --host 0.0.0.0 --port $PORT",
+  "outputDirectory": "classroom-frontend/dist"
+}
