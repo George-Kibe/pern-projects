@@ -36,6 +36,7 @@ const ClassesShow = () => {
   });
 
   const classDetails = query.data?.data;
+  console.log("Class Details: ", classDetails);
 
   const studentColumns = useMemo<ColumnDef<ClassUser>[]>(
     () => [
@@ -171,7 +172,7 @@ const ClassesShow = () => {
                 }
                 data-status={classDetails.status}
               >
-                {classDetails.status.toUpperCase()}
+                {classDetails.status?.toUpperCase()}
               </Badge>
             </div>
           </div>

@@ -1,9 +1,10 @@
-import { GitHubBanner, Refine, WelcomePage } from "@refinedev/core";
+import { Authenticated, GitHubBanner, Refine, WelcomePage } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 
 import routerProvider, {
   DocumentTitleHandler,
+  NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
@@ -13,7 +14,7 @@ import { useNotificationProvider } from "./components/refine-ui/notification/use
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 import { dataProvider } from "./providers/data";
 import Dashboard from "./pages/Dashboard";
-import { BookOpen, Building2, GraduationCap, Home } from "lucide-react";
+import { BookOpen, Building2, ClipboardCheck, GraduationCap, Home, Users } from "lucide-react";
 import { Layout } from "./components/refine-ui/layout/layout";
 import SubjectsList from "./pages/subjects/list";
 import CreateSubject from "./pages/subjects/create";
@@ -24,6 +25,13 @@ import DepartmentsCreate from "./pages/departments/create";
 import DepartmentShow from "./pages/departments/show";
 import SubjectsShow from "./pages/subjects/show";
 import ClassesShow from "./pages/classes/show";
+import { Login } from "./pages/login";
+import { Register } from "./pages/register";
+import FacultyList from "./pages/faculties/list";
+import FacultyShow from "./pages/faculties/show";
+import EnrollmentsCreate from "./pages/enrollments/create";
+import EnrollmentsJoin from "./pages/enrollments/join";
+import EnrollmentConfirm from "./pages/enrollments/confirm";
 
 
 function App() {
@@ -81,15 +89,48 @@ function App() {
                     icon: <Building2 />,
                   },
                 },
+                {
+                  name: "faculties",
+                  list: "/faculties",
+                  show: "/faculties/show/:id",
+                  meta: {
+                    label: "Faculties",
+                    icon: <Users />,
+                  },
+                },
+                {
+                  name: "enrollments",
+                  list: "/enrollments/create",
+                  create: "/enrollments/create",
+                  meta: {
+                    label: "Enrollments",
+                    icon: <ClipboardCheck />,
+                  },
+                },
+
 
               ]}
             >
               <Routes>
-                <Route element={
-                  <Layout>
-                    <Outlet />
-                  </Layout>
-                } >
+                 <Route
+                  element={
+                    <Authenticated key="public-routes" fallback={<Outlet />}>
+                      <NavigateToResource fallbackTo="/" />
+                    </Authenticated>
+                  }
+                >
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                </Route>
+                <Route 
+                  element={
+                    <Authenticated key="private-routes" fallback={<Login />}>
+                      <Layout>
+                        <Outlet />
+                      </Layout>
+                    </Authenticated>
+                  }
+                >
                   <Route path="/" element={<Dashboard />} />
                     <Route path="subjects">
                       <Route index element={<SubjectsList />} />
@@ -107,6 +148,17 @@ function App() {
                       <Route path="create" element={<DepartmentsCreate />} />
                       <Route path="show/:id" element={<DepartmentShow />} />
                     </Route>
+                    <Route path="faculties">
+                      <Route index element={<FacultyList />} />
+                      <Route path="show/:id" element={<FacultyShow />} />
+                    </Route>
+
+                    <Route path="enrollments">
+                      <Route path="create" element={<EnrollmentsCreate />} />
+                      <Route path="join" element={<EnrollmentsJoin />} />
+                      <Route path="confirm" element={<EnrollmentConfirm />} />
+                    </Route>
+
                 </Route>
                 
               </Routes>
